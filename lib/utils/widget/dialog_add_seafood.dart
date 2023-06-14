@@ -2,8 +2,8 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ship_management/models/fish.dart';
+import 'package:ship_management/models/group_fish.dart';
 import 'package:ship_management/models/seafood.dart';
-import 'package:ship_management/routes/routes.dart';
 import 'package:ship_management/services/shared_data/storage_service.dart';
 import 'package:ship_management/theme/theme.dart';
 import 'package:ship_management/utils/dropdown/dropdown_model.dart';
@@ -24,20 +24,27 @@ class _AddSeafoodDialogState extends State<AddSeafoodDialog> {
       ValueNotifier(null);
   List<FilterGroupOfFishItem> listIDGroupFish = [];
   List<Fish> listFish = [];
+  List<Fish> selectFishes = [];
+  List<GroupFish> listGroupFish = [];
   Map<int?, List<Fish>> groupFish = {};
 
   @override
   Widget build(BuildContext context) {
+    listGroupFish = StorageService.groupFish;
     groupFish = groupByObj(
       StorageService.fishes,
       (Fish object) => object.enumLoaiCa,
     );
     listFish = StorageService.fishes;
+    selectFishes = listFish;
+    if (listIDGroupFish.every((element) => element.value != GroupFish()))
+      listIDGroupFish
+          .add(FilterGroupOfFishItem(value: GroupFish(), display: 'All'));
 
-    for (var e in groupFish.keys) {
+    for (var e in listGroupFish) {
       if (listIDGroupFish.every((element) => element.value != e)) {
-        listIDGroupFish
-            .add(FilterGroupOfFishItem(value: e!, display: e.toString()));
+        listIDGroupFish.add(
+            FilterGroupOfFishItem(value: e, display: e.tenNhomCa.toString()));
       }
     }
 
@@ -62,7 +69,7 @@ class _AddSeafoodDialogState extends State<AddSeafoodDialog> {
                 valueListenable: _selectedType,
                 builder: (_, __, ___) {
                   return DropdownSearch<Fish>(
-                    items: listFish,
+                    items: selectFishes,
                     itemAsString: (item) => item.name,
                     onChanged: (v) => setState(() => type = v),
                     dropdownDecoratorProps: DropDownDecoratorProps(
@@ -112,7 +119,10 @@ class _AddSeafoodDialogState extends State<AddSeafoodDialog> {
                 value: _selectedType.value,
                 items: listIDGroupFish,
                 onChanged: (value) {
-                  listFish = groupFish[value?.value] ?? StorageService.fishes;
+                  if (value?.value.id == null) selectFishes = listFish;
+                  selectFishes = listFish
+                      .where((element) => element.nhomCaId == value?.value.id)
+                      .toList();
                   _selectedType.value = value;
 // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
                   _selectedType.notifyListeners();

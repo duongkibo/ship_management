@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ship_management/models/auth.dart';
 import 'package:ship_management/models/employee_info.dart';
 import 'package:ship_management/models/fish.dart';
+import 'package:ship_management/models/group_fish.dart';
 import 'package:ship_management/models/license_details.dart';
 import 'package:ship_management/models/profile.dart';
 import 'package:ship_management/utils/constants.dart';
@@ -23,6 +24,7 @@ enum _StorageKey {
   isSavePassWork,
   userName,
   passWord,
+  groupFish,
 }
 
 class StorageService {
@@ -73,16 +75,18 @@ class StorageService {
 
   static String getUserName() {
     final data = _prefs!.getString(
-      _StorageKey.userName.name,
-    ) ?? '';
+          _StorageKey.userName.name,
+        ) ??
+        '';
 
     return data;
   }
 
   static String getPassWord() {
     final data = _prefs!.getString(
-      _StorageKey.passWord.name,
-    ) ?? '';
+          _StorageKey.passWord.name,
+        ) ??
+        '';
 
     return data;
   }
@@ -110,8 +114,7 @@ class StorageService {
     final dir = await getApplicationDocumentsDirectory();
     await _prefs!.setString(
       _StorageKey.pathFile.name,
-      '$dir/QN${StorageService.profile?.soHieuTau}_${StorageService.profile
-          ?.chuyenBienSo}.txt',
+      '$dir/QN${StorageService.profile?.soHieuTau}_${StorageService.profile?.chuyenBienSo}.txt',
     );
   }
 
@@ -128,7 +131,7 @@ class StorageService {
   static TripStatus get tripStatus {
     final data = _prefs!.getString(_StorageKey.trip.name) ?? '';
     return TripStatus.values.firstWhere(
-          (e) => e.name == data,
+      (e) => e.name == data,
       orElse: () => TripStatus.unknown,
     );
   }
@@ -173,5 +176,16 @@ class StorageService {
   static List<LicenseDetail> get licenseDetails {
     final data = _prefs!.getStringList(_StorageKey.licenseDetail.name) ?? [];
     return [...data.map((e) => LicenseDetail.fromJson(jsonDecode(e)))];
+  }
+
+  /// group fish
+  static Future saveGroupFishes(List<GroupFish> groupFish) async {
+    final data = [...groupFish.map((e) => jsonEncode(e.toJson()))];
+    await _prefs!.setStringList(_StorageKey.groupFish.name, data);
+  }
+
+  static List<GroupFish> get groupFish {
+    final data = _prefs!.getStringList(_StorageKey.groupFish.name) ?? [];
+    return [...data.map((e) => GroupFish.fromJson(jsonDecode(e)))];
   }
 }

@@ -26,4 +26,8 @@ class ApiPath {
   static const sanLuongKhaiThac = '/SanLuongKhaiThac';
   static const thongTinKhaiThac = '/ThongTinKhaiThac';
   static const loaiCa = '/LoaiCa/GetAll';
+  static const nhomCa = '/NhomCa/GetAll';
+
+  static String getLoaiCaByNhomCaId(dynamic nhomId) =>
+      '/LoaiCa/GetLoaiCaByNhomCaId/$nhomId';
 }
