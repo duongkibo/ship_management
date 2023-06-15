@@ -39,4 +39,9 @@ class GroupFish {
 
     return data;
   }
+
+  @override
+  String toString() {
+    return '$tenNhomCa';
+  }
 }

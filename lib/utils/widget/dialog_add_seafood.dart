@@ -20,39 +20,31 @@ class AddSeafoodDialog extends StatefulWidget {
 class _AddSeafoodDialogState extends State<AddSeafoodDialog> {
   Fish? type;
   double? quantity;
-  final ValueNotifier<FilterGroupOfFishItem?> _selectedType =
-      ValueNotifier(null);
+  final ValueNotifier<GroupFish?> _selectedType = ValueNotifier(null);
   List<FilterGroupOfFishItem> listIDGroupFish = [];
-  List<Fish> listFish = [];
+  List<Fish> listFish = StorageService.fishes;
   List<Fish> selectFishes = [];
-  List<GroupFish> listGroupFish = [];
-  Map<int?, List<Fish>> groupFish = {};
+  List<GroupFish> listGroupFish = StorageService.groupFish;
+  bool isGroupFishes = false;
+  GroupFish allFishes = GroupFish(tenNhomCa: 'Tất cả');
+
+  @override
+  void initState() {
+    selectFishes = listFish;
+    for (var element in listGroupFish) {
+      if (element.tenNhomCa == allFishes.tenNhomCa) {
+        isGroupFishes = true;
+        break;
+      }
+    }
+    if (!isGroupFishes) {
+      listGroupFish.add(allFishes);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    listGroupFish = StorageService.groupFish;
-    groupFish = groupByObj(
-      StorageService.fishes,
-      (Fish object) => object.enumLoaiCa,
-    );
-    listFish = StorageService.fishes;
-    selectFishes = listFish;
-    if (listIDGroupFish.every((element) => element.value != GroupFish()))
-      listIDGroupFish
-          .add(FilterGroupOfFishItem(value: GroupFish(), display: 'All'));
-
-    for (var e in listGroupFish) {
-      if (listIDGroupFish.every((element) => element.value != e)) {
-        listIDGroupFish.add(
-            FilterGroupOfFishItem(value: e, display: e.tenNhomCa.toString()));
-      }
-    }
-
-    print(groupFish.keys.toList());
-    for (var item in StorageService.fishes) {
-      print(item.toString());
-    }
-
     return GestureDetector(
       onTap: () => clearFocus,
       child: Container(
@@ -105,26 +97,31 @@ class _AddSeafoodDialogState extends State<AddSeafoodDialog> {
     return Row(
       children: [
         Expanded(
+          flex: 2,
           child: Text(
             'Chọn Nhóm Cá :',
           ),
         ),
         Expanded(
+          flex: 3,
           child: ValueListenableBuilder(
             valueListenable: _selectedType,
             builder: (_, __, ___) {
-              return RoundedDropDown<FilterGroupOfFishItem>(
+              return RoundedDropDown<GroupFish>(
                 borderRadius: 10,
                 hintText: 'Nhóm cá',
                 value: _selectedType.value,
-                items: listIDGroupFish,
+                items: listGroupFish,
                 onChanged: (value) {
-                  if (value?.value.id == null) selectFishes = listFish;
-                  selectFishes = listFish
-                      .where((element) => element.nhomCaId == value?.value.id)
-                      .toList();
+                  if (value?.tenNhomCa == 'Tất cả') {
+                    selectFishes = listFish;
+                  } else {
+                    selectFishes = listFish
+                        .where((element) => element.nhomCaId == value?.id)
+                        .toList();
+                  }
+
                   _selectedType.value = value;
-// ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
                   _selectedType.notifyListeners();
                 },
               );
@@ -170,16 +167,4 @@ class _AddSeafoodDialogState extends State<AddSeafoodDialog> {
       );
     }
   }
-}
-
-Map<int, List<Fish>> groupByObj<Fish, int>(
-  List<Fish> values,
-  int Function(Fish) key,
-) {
-  var map = <int, List<Fish>>{};
-  for (var element in values) {
-    (map[key(element)] ??= []).add(element);
-  }
-
-  return map;
 }
