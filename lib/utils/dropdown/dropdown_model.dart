@@ -1,5 +1,7 @@
+import 'package:ship_management/models/group_fish.dart';
+
 class FilterGroupOfFishItem {
-  final int value;
+  final GroupFish value;
   final String display;
 
   FilterGroupOfFishItem({

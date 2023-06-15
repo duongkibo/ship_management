@@ -128,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
         tauId: res.user.tauId,
         enumGiayPhep: 10,
       ));
+      futureGroup.add(FishingLogRepository.groupFish);
 
       futureGroup.close();
       final result = await futureGroup.future;
@@ -135,8 +136,12 @@ class _LoginScreenState extends State<LoginScreen> {
       StorageService.saveProfileEmployee(result[1]);
       StorageService.saveFishes(result[2]);
       StorageService.saveLicenseDetail(result[3]);
-      print('-------fish');
+      StorageService.saveGroupFishes(result[4]);
+      print('-------group fish');
       for (var item in StorageService.fishes) {
+        print(item.toString());
+      }
+      for (var item in StorageService.groupFish) {
         print(item.toString());
       }
 

@@ -1,7 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:ship_management/models/fish.dart';
 import 'package:ship_management/models/fishing_log.dart';
+import 'package:ship_management/models/group_fish.dart';
 import 'package:ship_management/models/seafood.dart';
 import 'package:ship_management/services/database/reamldb/db.dart';
 import 'package:ship_management/services/network/api_path.dart';
@@ -23,6 +23,19 @@ class FishingLogRepository {
     }
 
     return [...res.data['data'].map((e) => Fish.fromMap(e))];
+  }
+
+  static Future<List<GroupFish>> get groupFish async {
+    final res = await Network().get(ApiPath.nhomCa);
+    if (res.data['succeeded'] != true) {
+      throw DioError(
+        requestOptions: res.requestOptions,
+        error: res.data,
+        type: DioErrorType.response,
+      );
+    }
+
+    return [...res.data['data'].map((e) => GroupFish.fromJson(e))];
   }
 
   static Future<List<FishingLog>> get list async {
@@ -53,7 +66,6 @@ class FishingLogRepository {
 
     return FishingLog.fromMap(res);
   }
-
 
   static Future delete(FishingLog log) async {
     return await RealmDb.deleteFishingLog(id: log.id);
@@ -101,7 +113,8 @@ class FishingLogRepository {
         'NgheLuoiKeoChieuDaiToanBo': 200,
         'NgheKhac': 'Các hoạt động khác',
         'TauId': profile?.id,
-        'thongTinKhaiThacs': logs.map((e) => e.toJson()).toList()},
+        'thongTinKhaiThacs': logs.map((e) => e.toJson()).toList()
+      },
     );
 
     if (res.data['succeeded'] != true) {
